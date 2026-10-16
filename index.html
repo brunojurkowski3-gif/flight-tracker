@@ -70,7 +70,7 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch Live Aircraft Data using a stable CORS proxy
+    // 3. Fetch Live Aircraft Data using corsproxy.io
     async function fetchFlightData() {
       const targetUrl = 'https://api.adsb.lol/v2/all';
       const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
