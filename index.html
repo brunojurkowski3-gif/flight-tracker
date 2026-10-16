@@ -70,9 +70,9 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch data directly via Cloudflare Pages Function endpoint
+    // 3. Fetch data directly via your deployed Cloudflare Worker endpoint
     async function fetchFlightData() {
-      const apiUrl = '/flights';
+      const apiUrl = 'https://flight-tracker.brunojurkowski3.workers.dev/flights';
 
       try {
         const response = await fetch(apiUrl);
