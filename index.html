@@ -70,12 +70,11 @@
 
     const planeMarkers = {};
 
-    // 3. Robust Fetcher with Multi-Proxy Fallback Chain
+    // 3. Ultra-reliable fetcher utilizing CodeTabs and alternative wrappers
     async function fetchWithFallbacks(targetUrl) {
       const proxies = [
-        url => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        url => `https://thingproxy.freeboard.io/fetch/${url}`,
-        url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`
+        url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        url => `https://cors.eu.org/?${encodeURIComponent(url)}`
       ];
 
       for (let i = 0; i < proxies.length; i++) {
@@ -86,13 +85,14 @@
             return await response.json();
           }
         } catch (e) {
-          console.warn(`Proxy ${i + 1} failed, trying next...`);
+          console.warn(`Proxy alternative ${i + 1} failed, trying next...`);
         }
       }
       throw new Error("All proxy servers failed to respond.");
     }
 
     async function fetchFlightData() {
+      // Using standard point endpoint
       const targetUrl = 'https://api.adsb.lol/v2/lat/50.0647/19.9450/250';
 
       try {
@@ -155,9 +155,9 @@
       }
     }
 
-    // Initial fetch & refresh loop every 15 seconds
+    // Initial fetch & refresh loop every 20 seconds
     fetchFlightData();
-    setInterval(fetchFlightData, 15000);
+    setInterval(fetchFlightData, 20000);
   </script>
 </body>
 </html>
