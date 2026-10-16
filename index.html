@@ -70,10 +70,10 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch Live Aircraft Data using a stable CORS proxy and the global feed
+    // 3. Fetch Live Aircraft Data using a stable CORS proxy
     async function fetchFlightData() {
       const targetUrl = 'https://api.adsb.lol/v2/all';
-      const proxyUrl = `https://api.cors.lol/?url=${encodeURIComponent(targetUrl)}`;
+      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
 
       try {
         const response = await fetch(proxyUrl);
@@ -124,7 +124,7 @@
           }
         });
 
-        // Clean up markers that left the area or data range
+        // Clean up markers that left the area
         Object.keys(planeMarkers).forEach(hex => {
           if (!updatedHexes.has(hex)) {
             map.removeLayer(planeMarkers[hex]);
@@ -138,9 +138,9 @@
       }
     }
 
-    // Initial fetch & refresh loop every 15 seconds
+    // Initial fetch & refresh loop every 12 seconds
     fetchFlightData();
-    setInterval(fetchFlightData, 15000);
+    setInterval(fetchFlightData, 12000);
   </script>
 </body>
 </html>
