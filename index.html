@@ -58,7 +58,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
   <script>
-    // 1. Initialize Map centered over Central Europe
+    // 1. Initialize Map centered over Central Europe (Poland)
     const map = L.map('map').setView([50.0647, 19.9450], 6);
 
     // 2. Bright OpenStreetMap Tiles
@@ -70,16 +70,19 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch regional aircraft data via proxy with rate-limit protection
+    // 3. Fetch regional aircraft data using allorigins JSON wrapper to prevent 403 blocks
     async function fetchFlightData() {
-      const targetUrl = 'https://api.adsb.lol/v2/lat/50.0647/19.9450/200';
-      const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(targetUrl)}`;
+      const targetUrl = 'https://api.adsb.lol/v2/lat/50.0647/19.9450/250';
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
 
       try {
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        const data = await response.json();
+        const wrapper = await response.json();
+        if (!wrapper.contents) throw new Error("Empty response from proxy");
+
+        const data = JSON.parse(wrapper.contents);
         const aircraftList = data.ac || [];
 
         document.getElementById('plane-count').innerText = `Live Aircraft Visible: ${aircraftList.length}`;
@@ -138,9 +141,9 @@
       }
     }
 
-    // Initial fetch & safe refresh loop every 30 seconds to avoid 429 errors
+    // Initial fetch & safe refresh loop every 20 seconds
     fetchFlightData();
-    setInterval(fetchFlightData, 30000);
+    setInterval(fetchFlightData, 20000);
   </script>
 </body>
 </html>
