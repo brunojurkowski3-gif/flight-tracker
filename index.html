@@ -61,7 +61,7 @@
     // 1. Initialize Map centered over Europe
     const map = L.map('map').setView([48.8566, 2.3522], 6);
 
-    // 2. OpenStreetMap Standard Tiles with a proper custom User-Agent/App identifier in the options to prevent blocks
+    // 2. Bright OpenStreetMap Tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -70,13 +70,10 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch Live Aircraft Data directly from adsb.lol
+    // 3. Fetch Live Aircraft Data from adsb.lol global endpoint
     async function fetchFlightData() {
-      const center = map.getCenter();
-      const lat = center.lat.toFixed(4);
-      const lon = center.lng.toFixed(4);
-      
-      const url = `https://api.adsb.lol/v2/point/${lat}/${lon}/50`;
+      // Using the main v2/lat/lon endpoint or general feed to ensure connection success
+      const url = `https://api.adsb.lol/v2/lat/50.0647/19.9450/250`; // Centered roughly over Central Europe with 250nm radius
 
       try {
         const response = await fetch(url);
@@ -92,13 +89,13 @@
         aircraftList.forEach(plane => {
           const hex = plane.hex;
           const callsign = plane.flight ? plane.flight.trim() : (plane.r || 'UNKNOWN');
-          const lat = plane.lat;
-          const lon = plane.lon;
+          const pLat = plane.lat;
+          const pLon = plane.lon;
           const alt = plane.alt_baro !== undefined ? `${plane.alt_baro} ft` : 'N/A';
           const speed = plane.gs !== undefined ? `${Math.round(plane.gs)} knots` : 'N/A';
           const aircraftType = plane.t || 'Unknown Type';
 
-          if (!lat || !lon) return;
+          if (!pLat || !pLon) return;
 
           updatedHexes.add(hex);
 
@@ -111,10 +108,10 @@
           `;
 
           if (planeMarkers[hex]) {
-            planeMarkers[hex].setLatLng([lat, lon]);
+            planeMarkers[hex].setLatLng([pLat, pLon]);
             planeMarkers[hex].getPopup().setContent(popupContent);
           } else {
-            const marker = L.circleMarker([lat, lon], {
+            const marker = L.circleMarker([pLat, pLon], {
               radius: 6,
               color: '#0056b3',
               fillColor: '#0078ff',
@@ -137,16 +134,13 @@
 
       } catch (err) {
         console.error("Failed to fetch aircraft:", err);
-        document.getElementById('plane-count').innerText = "Connection error. Retrying...";
+        document.getElementById('plane-count').innerText = "Connection error. Check Console (F12)";
       }
     }
 
     // Initial fetch & refresh loop every 6 seconds
     fetchFlightData();
     setInterval(fetchFlightData, 6000);
-
-    // Refresh data when user finishes moving the map
-    map.on('moveend', fetchFlightData);
   </script>
 </body>
 </html>
