@@ -70,33 +70,15 @@
 
     const planeMarkers = {};
 
-    // 3. Ultra-reliable fetcher utilizing CodeTabs and alternative wrappers
-    async function fetchWithFallbacks(targetUrl) {
-      const proxies = [
-        url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-        url => `https://cors.eu.org/?${encodeURIComponent(url)}`
-      ];
-
-      for (let i = 0; i < proxies.length; i++) {
-        try {
-          const proxyUrl = proxies[i](targetUrl);
-          const response = await fetch(proxyUrl);
-          if (response.ok) {
-            return await response.json();
-          }
-        } catch (e) {
-          console.warn(`Proxy alternative ${i + 1} failed, trying next...`);
-        }
-      }
-      throw new Error("All proxy servers failed to respond.");
-    }
-
+    // 3. Fetch data directly via Cloudflare Pages Function endpoint
     async function fetchFlightData() {
-      // Using standard point endpoint
-      const targetUrl = 'https://api.adsb.lol/v2/lat/50.0647/19.9450/250';
+      const apiUrl = '/flights';
 
       try {
-        const data = await fetchWithFallbacks(targetUrl);
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
+        
+        const data = await response.json();
         const aircraftList = data.ac || [];
 
         document.getElementById('plane-count').innerText = `Live Aircraft Visible: ${aircraftList.length}`;
@@ -155,9 +137,9 @@
       }
     }
 
-    // Initial fetch & refresh loop every 20 seconds
+    // Initial fetch & refresh loop every 15 seconds
     fetchFlightData();
-    setInterval(fetchFlightData, 20000);
+    setInterval(fetchFlightData, 15000);
   </script>
 </body>
 </html>
