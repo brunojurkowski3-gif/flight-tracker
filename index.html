@@ -70,13 +70,13 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch Live Aircraft Data from adsb.lol global endpoint
+    // 3. Fetch Live Aircraft Data using CORS Proxy to prevent blocked requests & 429 errors
     async function fetchFlightData() {
-      // Using the main v2/lat/lon endpoint or general feed to ensure connection success
-      const url = `https://api.adsb.lol/v2/lat/50.0647/19.9450/250`; // Centered roughly over Central Europe with 250nm radius
+      const targetUrl = 'https://api.adsb.lol/v2/lat/48.8566/2.3522/250';
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
 
       try {
-        const response = await fetch(url);
+        const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
         const data = await response.json();
@@ -134,13 +134,13 @@
 
       } catch (err) {
         console.error("Failed to fetch aircraft:", err);
-        document.getElementById('plane-count').innerText = "Connection error. Check Console (F12)";
+        document.getElementById('plane-count').innerText = "Connection error. Retrying...";
       }
     }
 
-    // Initial fetch & refresh loop every 6 seconds
+    // Initial fetch & refresh loop every 12 seconds to respect rate limits (prevent 429)
     fetchFlightData();
-    setInterval(fetchFlightData, 6000);
+    setInterval(fetchFlightData, 12000);
   </script>
 </body>
 </html>
