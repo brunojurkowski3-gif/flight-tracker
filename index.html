@@ -70,19 +70,17 @@
 
     const planeMarkers = {};
 
-    // 3. Fetch regional aircraft data using allorigins JSON wrapper to prevent 403 blocks
+    // 3. Fetch flight data via a robust alternative CORS handler
     async function fetchFlightData() {
       const targetUrl = 'https://api.adsb.lol/v2/lat/50.0647/19.9450/250';
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+      // Using an alternative open proxy endpoint that bypasses 403 restrictions
+      const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
 
       try {
         const response = await fetch(proxyUrl);
         if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
         
-        const wrapper = await response.json();
-        if (!wrapper.contents) throw new Error("Empty response from proxy");
-
-        const data = JSON.parse(wrapper.contents);
+        const data = await response.json();
         const aircraftList = data.ac || [];
 
         document.getElementById('plane-count').innerText = `Live Aircraft Visible: ${aircraftList.length}`;
@@ -141,9 +139,9 @@
       }
     }
 
-    // Initial fetch & safe refresh loop every 20 seconds
+    // Initial fetch & refresh loop every 15 seconds
     fetchFlightData();
-    setInterval(fetchFlightData, 20000);
+    setInterval(fetchFlightData, 15000);
   </script>
 </body>
 </html>
